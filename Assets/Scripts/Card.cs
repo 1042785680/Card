@@ -2,32 +2,44 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Card : MonoBehaviour {
+public class Card : MonoBehaviour
+{
 
-    public GameObject ForceBall;
+    private Rigidbody rb;
 
-    public Vector3 ForcePosition;
+    private MeshFilter mf;
 
-    void Start () {
 
-        Invoke("Force", 1);
-	}
-	
-	void Update () {
-
-        //if (Input.GetKeyDown(KeyCode.Z))
-        //{
-        //    Force();
-        //}
-	}
-
-    void Force()
+    private void Start()
     {
-        //gameObject.GetComponent<Rigidbody>().AddForceAtPosition(new Vector3(ForceBall.transform.position.x - transform.position.x,
-        //    100, ForceBall.transform.position.z - transform.position.z), new Vector3(0, 0, 0));
+        rb = gameObject.GetComponent<Rigidbody>();
+        mf = gameObject.GetComponent<MeshFilter>();
+    }
 
-        gameObject.GetComponent<Rigidbody>().AddForceAtPosition(new Vector3((transform.position.x - ForceBall.transform.position.x) * 30,
-            200, (transform.position.z - ForceBall.transform.position.z) * 10), ForceBall.transform.position);
+    private void FixedUpdate()
+    {
+        Force();
+    }
+
+    private void Force()
+    {
+        GameObject ForceBall = GameObject.FindGameObjectWithTag("Force");
+        if (!ForceBall)
+            return;
+        Vector3[] vertices = mf.mesh.vertices;
+        foreach (Vector3 vertex in vertices)
+        {
+            Vector3 vertexWorld = transform.TransformPoint(vertex);
+            Vector3 vec = vertexWorld - ForceBall.transform.position;
+            ForceAttrbution fa = ForceBall.gameObject.GetComponent<ForceAttrbution>();
+            float forceMagnitudeOnSource = fa.forceMagnitude;
+            float attenuationRate = fa.attenuationRate;
+            float distance = vec.magnitude;
+            float forceMagnitudeOnVertex = fa.forceAttenuation(forceMagnitudeOnSource, distance);
+            Vector3 forceOnVertex = vec.normalized * forceMagnitudeOnVertex;
+            rb.AddForceAtPosition(forceOnVertex, vertexWorld);
+        }
     }
 
 }
+
