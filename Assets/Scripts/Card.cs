@@ -9,6 +9,8 @@ public class Card : MonoBehaviour
 
     private MeshFilter mf;
 
+    private bool isFront;
+
 
     private void Start()
     {
@@ -18,10 +20,10 @@ public class Card : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Force();
+        AddForceToCard();
     }
 
-    private void Force()
+    private void AddForceToCard()
     {
         GameObject ForceBall = GameObject.FindGameObjectWithTag("Force");
         if (!ForceBall)
@@ -33,9 +35,8 @@ public class Card : MonoBehaviour
             Vector3 vec = vertexWorld - ForceBall.transform.position;
             ForceAttrbution fa = ForceBall.gameObject.GetComponent<ForceAttrbution>();
             float forceMagnitudeOnSource = fa.forceMagnitude;
-            float attenuationRate = fa.attenuationRate;
             float distance = vec.magnitude;
-            float forceMagnitudeOnVertex = fa.forceAttenuation(forceMagnitudeOnSource, distance);
+            float forceMagnitudeOnVertex = fa.ForceAttenuation(forceMagnitudeOnSource, distance);
             Vector3 forceOnVertex = vec.normalized * forceMagnitudeOnVertex;
             rb.AddForceAtPosition(forceOnVertex, vertexWorld);
         }
